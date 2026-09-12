@@ -1,0 +1,193 @@
+Task 4 — Permission defect
+
+BEFORE FIX — candidate-supplied PowerShell curl.exe -i output
+Request: GET http://localhost:8080/wp-json/bemalearn/v1/me/earnings
+Account: learner@example.test (learner)
+Authorization: Bearer <redacted>
+The Link header's URLs were converted from chat Markdown back to plain text.
+
+HTTP/1.1 200 OK
+Date: Sat, 12 Sep 2026 06:13:01 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Allow: GET
+Vary: Origin
+Content-Length: 109
+Content-Type: application/json; charset=UTF-8
+
+{"availableMinor":0,"pendingMinor":0,"currency":"NGN","minimumWithdrawalMinor":50000,"lastWithdrawalAt":null}
+
+CHANGE
+The GET /me/earnings permission callback now uses the existing check_instructor
+instead of check_authenticated. The ledger query was already scoped to the
+caller; the demonstrated defect is allowing a learner to access this route.
+
+AFTER FIX — candidate-supplied PowerShell curl.exe -i output
+Request: GET http://localhost:8080/wp-json/bemalearn/v1/me/earnings
+Account: learner@example.test (learner)
+Authorization: Bearer <redacted>
+The Link header's URLs were converted from chat Markdown back to plain text.
+
+HTTP/1.1 403 Forbidden
+Date: Sat, 12 Sep 2026 06:22:37 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Vary: Origin
+Content-Length: 72
+Content-Type: application/json; charset=UTF-8
+
+{"code":"forbidden","message":"Instructors only.","data":{"status":403}}
+
+AFTER FIX — signed-out regression check, candidate-supplied curl.exe -i output
+Request: GET http://localhost:8080/wp-json/bemalearn/v1/me/earnings
+Authorization: absent
+The Link header's URLs were converted from chat Markdown back to plain text.
+
+HTTP/1.1 401 Unauthorized
+Date: Sat, 12 Sep 2026 06:24:48 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Vary: Origin
+Content-Length: 81
+Content-Type: application/json; charset=UTF-8
+
+{"code":"unauthenticated","message":"Sign in to continue.","data":{"status":401}}
+
+AFTER FIX — instructor regression check, candidate-supplied curl.exe -i output
+Request: GET http://localhost:8080/wp-json/bemalearn/v1/me/earnings
+Account: instructor@example.test (instructor)
+Authorization: Bearer <redacted>
+Chat blockquote prefixes removed; Link URLs restored to plain HTTP header syntax.
+
+HTTP/1.1 200 OK
+Date: Sat, 12 Sep 2026 06:27:38 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Allow: GET
+Vary: Origin
+Content-Length: 118
+Content-Type: application/json; charset=UTF-8
+
+{"availableMinor":128500,"pendingMinor":45000,"currency":"NGN","minimumWithdrawalMinor":50000,"lastWithdrawalAt":null}
+
+Task 4 publication filter: GET /wp-json/bemalearn/v1/courses - BEFORE
+Captured from the assistant's real curl.exe -i output before the publication filter was applied; curl progress-meter text excluded.
+
+HTTP/1.1 200 OK
+Date: Sat, 12 Sep 2026 08:13:23 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Allow: GET
+Vary: Origin
+Content-Length: 1063
+Content-Type: application/json; charset=UTF-8
+
+{"courses":[{"id":4,"title":"Cake Decorating Basics","instructorName":"Ada Okafor","priceMinor":3000,"currency":"NGN","enrolmentCount":9,"averageRating":0,"publishedAt":"2026-06-11T08:00:00+00:00","isPublished":true},{"id":3,"title":"Pastry Fundamentals","instructorName":"Ada Okafor","priceMinor":7500,"currency":"NGN","enrolmentCount":null,"averageRating":null,"publishedAt":"2026-05-20T08:00:00+00:00","isPublished":true},{"id":2,"title":"Sourdough Starters","instructorName":"Ada Okafor","priceMinor":6000,"currency":"NGN","enrolmentCount":64,"averageRating":4.2,"publishedAt":"2026-04-02T08:00:00+00:00","isPublished":true},{"id":1,"title":"Introduction to Bread Baking","instructorName":"Ada Okafor","priceMinor":4500,"currency":"NGN","enrolmentCount":128,"averageRating":4.6,"publishedAt":"2026-03-14T08:00:00+00:00","isPublished":true},{"id":5,"title":"Advanced Laminated Dough","instructorName":"Ada Okafor","priceMinor":9000,"currency":"NGN","enrolmentCount":0,"averageRating":null,"publishedAt":null,"isPublished":false}],"previewExpiresInSeconds":300}
+
+Task 4 publication filter: GET /wp-json/bemalearn/v1/courses - AFTER
+HTTP/1.1 200 OK
+Date: Sat, 12 Sep 2026 08:25:40 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Allow: GET
+Vary: Origin
+Content-Length: 875
+Content-Type: application/json; charset=UTF-8
+
+{"courses":[{"id":4,"title":"Cake Decorating Basics","instructorName":"Ada Okafor","priceMinor":3000,"currency":"NGN","enrolmentCount":9,"averageRating":0,"publishedAt":"2026-06-11T08:00:00+00:00","isPublished":true},{"id":3,"title":"Pastry Fundamentals","instructorName":"Ada Okafor","priceMinor":7500,"currency":"NGN","enrolmentCount":null,"averageRating":null,"publishedAt":"2026-05-20T08:00:00+00:00","isPublished":true},{"id":2,"title":"Sourdough Starters","instructorName":"Ada Okafor","priceMinor":6000,"currency":"NGN","enrolmentCount":64,"averageRating":4.2,"publishedAt":"2026-04-02T08:00:00+00:00","isPublished":true},{"id":1,"title":"Introduction to Bread Baking","instructorName":"Ada Okafor","priceMinor":4500,"currency":"NGN","enrolmentCount":128,"averageRating":4.6,"publishedAt":"2026-03-14T08:00:00+00:00","isPublished":true}],"previewExpiresInSeconds":300}
+
+Task 4 schema mismatch - GET /courses/1 - BEFORE (assistant-executed curl.exe -sS -i)
+HTTP/1.1 200 OK
+Date: Sat, 12 Sep 2026 08:33:11 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Allow: GET
+Vary: Origin
+Content-Length: 324
+Content-Type: application/json; charset=UTF-8
+
+{"id":1,"title":"Introduction to Bread Baking","instructorName":"Ada Okafor","priceMinor":4500,"currency":"NGN","enrolmentCount":128,"averageRating":4.6,"publishedAt":"2026-03-14T08:00:00+00:00","isPublished":true,"description":"Introduction to Bread Baking - a short course for the assessment environment.","lessonCount":0}
+
+Task 4 schema mismatch - GET /courses/1 - AFTER (assistant-executed curl.exe -sS -i)
+HTTP/1.1 200 OK
+Date: Sat, 12 Sep 2026 08:33:54 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Allow: GET
+Vary: Origin
+Content-Length: 325
+Content-Type: application/json; charset=UTF-8
+
+{"id":1,"title":"Introduction to Bread Baking","instructorName":"Ada Okafor","priceMinor":4500,"currency":"NGN","enrolmentCount":128,"averageRating":4.6,"publishedAt":"2026-03-14T08:00:00+00:00","isPublished":true,"description":"Introduction to Bread Baking - a short course for the assessment environment.","lessonCount":12}
+
+Minimum validation before - assistant-executed curl -i. POST /me/withdrawals, amountMinor=1000, payoutReference=test_min_before_60b32c967539425fb19e198fe328fb39, matching Idempotency-Key. Authorization: Bearer <redacted>
+HTTP/1.1 201 Created
+Date: Sat, 12 Sep 2026 08:39:42 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Allow: POST
+Content-Length: 155
+Content-Type: application/json; charset=UTF-8
+
+{"id":2,"amountMinor":1000,"status":"pending","payoutReference":"test_min_before_60b32c967539425fb19e198fe328fb39","createdAt":"2026-09-12T08:39:42+00:00"}
+
+Minimum validation after - assistant-executed curl -i. POST /me/withdrawals, amountMinor=1000, payoutReference=test_min_after_78ccf055544b405c9f955cac34846ea6, matching Idempotency-Key. Authorization: Bearer <redacted>
+HTTP/1.1 422 Unprocessable Entity
+Date: Sat, 12 Sep 2026 08:40:19 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Allow: POST
+Content-Length: 112
+Content-Type: application/json; charset=UTF-8
+
+{"code":"below_minimum","message":"The requested amount is below the minimum withdrawal.","data":{"status":422}}

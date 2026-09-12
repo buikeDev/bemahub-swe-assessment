@@ -5,10 +5,10 @@
  * token. You should not need to set the Authorization header by hand anywhere
  * else in the app.
  *
- * The RESPONSE interceptor is deliberately incomplete - see TASK-2.
+ * The response interceptor clears rejected sessions while preserving errors.
  */
 import axios from "axios";
-import { getStoredToken } from "@/lib/auth/authStore";
+import { getStoredToken, useAuthStore } from "@/lib/auth/authStore";
 
 const baseURL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/wp-json/bemalearn/v1";
@@ -28,8 +28,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// TODO (Task 2): handle 401 here.
-// Think about what should happen to stored auth state, and how a caller can
-// tell a TRANSPORT failure (no response at all) from a BUSINESS refusal.
+api.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      // A delayed response from an old session must not clear a newer login.
+      const sentHeader = error.config?.headers.Authorization;
+      const currentToken = getStoredToken();
+      if (currentToken && sentHeader === `Bearer ${currentToken}`) {
+        useAuthStore.getState().signOut();
+      }
+    }
+    // Preserve response/status so callers can distinguish refusals from outages.
+    return Promise.reject(error);
+  },
+);
 
 export default api;

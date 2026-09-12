@@ -1,0 +1,37 @@
+Controlled local server-refusal test; executed by the assistant through Docker MySQL.
+The browser retains previously fetched availableMinor=128500 while GET /me/earnings
+is blocked. POST /me/withdrawals remains unblocked.
+
+Before: instructor_id=2, available_minor=128500; withdrawal id=1, amount_minor=60000, status=pending.
+
+SQL applied:
+INSERT INTO wp_bl_earnings_ledger (instructor_id,amount_minor,entry_type,available_at)
+SELECT 2,-88500,'test_t3_debit',UTC_TIMESTAMP()
+WHERE NOT EXISTS (SELECT 1 FROM wp_bl_earnings_ledger WHERE instructor_id=2 AND entry_type='test_t3_debit');
+
+Verified output:
+id  instructor_id  amount_minor  entry_type
+5   2              -88500        test_t3_debit
+
+instructor_id  available_minor
+2              40000
+
+Expected next action: candidate submits 60000 from the stale form, captures the
+real 422 insufficient_balance response and amount-field error.
+
+RESULT: candidate supplied screenshots of POST /me/withdrawals returning 422
+and the amount-field message: Your available balance is lower than the requested amount.
+
+RESTORATION COMPLETED by assistant: appended +88500 for instructor 2 with
+entry_type test_t3_restore, guarded against duplicate restoration entries.
+Verified output:
+id  instructor_id  amount_minor  entry_type
+5   2              -88500        test_t3_debit
+6   2               88500        test_t3_restore
+
+instructor_id  available_minor
+2              128500
+
+Withdrawals still contain only id=1, instructor_id=2, amount_minor=60000, status=pending.
+Candidate should now unblock GET /me/earnings and reload.
+No original ledger rows or withdrawals were edited or deleted.

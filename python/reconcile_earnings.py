@@ -21,7 +21,7 @@ import sys
 
 
 def load_payouts(path):
-    with open(path) as fh:
+    with open(path, encoding="utf-8") as fh:
         return json.load(fh)
 
 
@@ -38,9 +38,16 @@ def summarise(payouts):
     totals = {}
 
     for row in payouts:
+        if row["status"] != "paid":
+            continue
+
         instructor = row["instructor_id"]
         amount = row["amount_minor"]
-        fee = row["fee_minor"]
+        # Assessment policy: an absent or null fee means no fee recorded.
+        # Only those cases default to zero; do not coerce other values.
+        fee = row.get("fee_minor")
+        if fee is None:
+            fee = 0
 
         net = amount - fee
 
@@ -56,7 +63,11 @@ def main(argv):
         print("usage: reconcile_earnings.py <payouts.json>", file=sys.stderr)
         return 1
 
-    payouts = load_payouts(argv[1])
+    try:
+        payouts = load_payouts(argv[1])
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        print(f"Could not read or parse payouts: {exc}", file=sys.stderr)
+        return 2
     totals = summarise(payouts)
 
     print("instructor_id,total_net_minor")

@@ -1,19 +1,7 @@
-# Task 5 — Database
+Task 5 - actual assistant-executed MySQL output
 
-Executed by the assistant against local MySQL. Candidate personal review remains pending. Raw evidence: evidence/task-5-queries.txt.
+BEFORE (exit 0)
 
-## 5.1 NULL vs 0
-Course 3 has NULL enrolments and rating. Course 4 has a measured zero rating. Course 5 has zero enrolments and a NULL rating. Courses 1 and 2 have nonzero values.
-
-NULL means unknown or not yet measured, while zero is a known measurement. Conflating them misleads users about course popularity and quality.
-
-The final transcript contains the query showing every course and its NULL flags.
-
-## 5.2 Constraint
-MySQL permits multiple NULL values in unique indexes; including nullable cancelled_at allowed duplicate instructor/reference pairs.
-
-Before-fix inserts and results (exit 0):
-```text
 mysql: [Warning] Using a password on the command line interface can be insecure.
 --------------
 START TRANSACTION
@@ -51,23 +39,9 @@ SELECT COUNT(*) AS probe_rows_after_rollback FROM wp_bl_withdrawals WHERE payout
 |                         0 |
 +---------------------------+
 
-```
 
-Probe duplicates were rolled back before migration; preflight found no other duplicates. No original financial records were deleted or merged. Auto-increment gaps from rolled-back inserts are expected.
+APPLY 002 (exit 0)
 
-### Forward-only migration
-File: database/migrations/002_fix_withdrawal_reference.sql
-
-```sql
-ALTER TABLE wp_bl_withdrawals
-    DROP INDEX uq_reference,
-    ADD UNIQUE KEY uq_reference (instructor_id, payout_reference);
-```
-
-A new migration updates the existing database without rewriting the applied 001 migration. Removing cancelled_at prevents reference reuse even after cancellation. The API requires nonempty references; the nullable reference column still permits direct SQL NULL references, outside this narrow fix.
-
-Applying migration (exit 0):
-```text
 mysql: [Warning] Using a password on the command line interface can be insecure.
 --------------
 -- Forward-only correction. Run once after 001_initial.sql.
@@ -96,10 +70,9 @@ ALTER TABLE wp_bl_withdrawals
 --------------
 
 
-```
 
-SHOW CREATE TABLE and rejected duplicate (expected exit 1):
-```text
+AFTER duplicate test (expected exit 1)
+
 mysql: [Warning] Using a password on the command line interface can be insecure.
 --------------
 SHOW CREATE TABLE wp_bl_withdrawals
@@ -135,17 +108,9 @@ INSERT INTO wp_bl_withdrawals (instructor_id,amount_minor,status,payout_referenc
 
 ERROR 1062 (23000) at line 1: Duplicate entry '2-task5_duplicate_probe' for key 'wp_bl_withdrawals.uq_reference'
 
-```
 
-The error closed the connection, rolling back the open InnoDB transaction. The final query confirms zero probe rows.
+FINAL queries (exit 0)
 
-## 5.3 Join
-The final transcript includes the exact LEFT JOIN query and output. LEFT JOIN preserves all courses; INNER JOIN would omit those without matching non-refunded enrolments. The refund predicate stays in ON so courses with only refunded rows remain. COUNT(e.id) counts real matches and COALESCE makes absent revenue zero.
-
-Bread Baking has two actual non-refunded enrolment rows totaling 9000 minor units. All other courses have zero. These rows differ from the seeded cached enrolment_count measurements.
-
-## Final queries and results
-```text
 mysql: [Warning] Using a password on the command line interface can be insecure.
 --------------
 SELECT id,title,enrolment_count,enrolment_count IS NULL AS enrolment_is_null,average_rating,average_rating IS NULL AS rating_is_null FROM wp_bl_courses ORDER BY id
@@ -186,9 +151,4 @@ SELECT c.id,c.title,COUNT(e.id) AS non_refunded_enrolments,COALESCE(SUM(e.amount
 |  4 | Cake Decorating Basics       |                       0 |             0 |
 |  5 | Advanced Laminated Dough     |                       0 |             0 |
 +----+------------------------------+-------------------------+---------------+
-
-```
-
-## Reproduction note
-Apply 002 once after initial setup on a fresh database. The original plugin activation/reset schema still describes the original index; reset/reactivation behavior is unverified, so check SHOW CREATE TABLE after such operations. Migration 001 was not edited.
 

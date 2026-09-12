@@ -1,0 +1,14 @@
+HTTP/1.1 201 Created
+Date: Sat, 12 Sep 2026 08:39:42 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Allow: POST
+Content-Length: 155
+Content-Type: application/json; charset=UTF-8
+
+{"id":2,"amountMinor":1000,"status":"pending","payoutReference":"test_min_before_60b32c967539425fb19e198fe328fb39","createdAt":"2026-09-12T08:39:42+00:00"}

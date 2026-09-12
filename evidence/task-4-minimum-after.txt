@@ -1,0 +1,14 @@
+HTTP/1.1 422 Unprocessable Entity
+Date: Sat, 12 Sep 2026 08:40:19 GMT
+Server: Apache/2.4.67 (Debian)
+X-Powered-By: PHP/8.3.31
+X-Robots-Tag: noindex
+Link: <http://localhost:8080/wp-json/>; rel="https://api.w.org/"
+X-Content-Type-Options: nosniff
+Access-Control-Expose-Headers: X-WP-Total, X-WP-TotalPages, Link
+Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type
+Allow: POST
+Content-Length: 112
+Content-Type: application/json; charset=UTF-8
+
+{"code":"below_minimum","message":"The requested amount is below the minimum withdrawal.","data":{"status":422}}

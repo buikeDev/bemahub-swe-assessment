@@ -1,0 +1,54 @@
+Task 7 - assistant-executed commands, Python 3.14.7
+
+BEFORE: py -3 python/reconcile_earnings.py python/payouts.json
+Traceback (most recent call last):
+  File "C:\Users\HP\Documents\GitHub\bemahub-swe-assessment\python\reconcile_earnings.py", line 70, in <module>
+    sys.exit(main(sys.argv))
+             ~~~~^^^^^^^^^^
+  File "C:\Users\HP\Documents\GitHub\bemahub-swe-assessment\python\reconcile_earnings.py", line 60, in main
+    totals = summarise(payouts)
+  File "C:\Users\HP\Documents\GitHub\bemahub-swe-assessment\python\reconcile_earnings.py", line 43, in summarise
+    fee = row["fee_minor"]
+          ~~~^^^^^^^^^^^^^
+KeyError: 'fee_minor'
+
+
+BEFORE: py -3 python/reconcile_earnings.py python/missing-task7.json
+Traceback (most recent call last):
+  File "C:\Users\HP\Documents\GitHub\bemahub-swe-assessment\python\reconcile_earnings.py", line 70, in <module>
+    sys.exit(main(sys.argv))
+             ~~~~^^^^^^^^^^
+  File "C:\Users\HP\Documents\GitHub\bemahub-swe-assessment\python\reconcile_earnings.py", line 59, in main
+    payouts = load_payouts(argv[1])
+  File "C:\Users\HP\Documents\GitHub\bemahub-swe-assessment\python\reconcile_earnings.py", line 24, in load_payouts
+    with open(path) as fh:
+         ~~~~^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'python/missing-task7.json'
+
+
+AFTER: py -3 python/reconcile_earnings.py python/payouts.json
+PowerShell: Write-Output "Python exit code: $LASTEXITCODE"
+instructor_id,total_net_minor
+7,84750
+9,79700
+11,30000
+Python exit code: 0
+
+
+AFTER: py -3 python/reconcile_earnings.py python/missing-task7.json
+PowerShell: Write-Output "Python exit code: $LASTEXITCODE"
+Could not read or parse payouts: [Errno 2] No such file or directory: 'python/missing-task7.json'
+Python exit code: 2
+
+
+AFTER: py -3 python/reconcile_earnings.py evidence/task-7-invalid.json
+PowerShell: Write-Output "Python exit code: $LASTEXITCODE"
+Could not read or parse payouts: Expecting property name enclosed in double quotes: line 1 column 3 (char 2)
+Python exit code: 2
+
+
+AFTER: py -3 python/reconcile_earnings.py 
+PowerShell: Write-Output "Python exit code: $LASTEXITCODE"
+usage: reconcile_earnings.py <payouts.json>
+Python exit code: 1
+
